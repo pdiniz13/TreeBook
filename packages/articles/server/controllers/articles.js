@@ -24,8 +24,9 @@ blobSvc.createContainerIfNotExists('userpictures', {publicAccessLevel: 'blob'}, 
 exports.getTreeData = function(req, res) {
   var treeid = req.params.treeId;
   pg.connect(conString, function(err, client, done) {
-    var selectMessages = 'SELECT tree.name, tree.treeid, q.qspecies, tree.plotsize, tree.qcaretaker, tree.plantdate, l.latitude, l.longitude, image.imageurl, image.imagewidth, image.imageheight, image.imagetype from qspecies q JOIN tree ON (q.qspeciesid = tree.qspeciesid) JOIN "location" l ON (l.locationid = tree.locationid) JOIN image ON (q.qspeciesid = image.qspeciesid) WHERE treeid = $1;';
+    var selectMessages = 'SELECT tree.name, tree.treeid, q.qspecies, tree.plotsize, tree.qcaretaker, tree.plantdate, l.latitude, l.longitude, image.imageurl, image.imagewidth, image.imageheight, image.imagetype from qspecies q JOIN tree ON (q.qspeciesid = tree.qspeciesid) JOIN "location" l ON (l.locationid = tree.locationid) "JOIN" image ON (q.qspeciesid = image.qspeciesid) WHERE treeid = $1;';
     client.query(selectMessages, [treeid], function(error, results) {
+      console.log(selectMessages);
       if (error) {
         console.log(error, 'THERE WAS AN ERROR');
       } else {
@@ -44,7 +45,7 @@ exports.getTreeData = function(req, res) {
 exports.getAll = function(req, res) {
   pg.connect(conString, function(err, client, done) {
     // console.log(err);
-    var selectTrees = 'SELECT tree.name, tree.treeid, q.qspecies, l.latitude, l.longitude, thumbnail.url, thumbnail.width, thumbnail.height, thumbnail.contenttype FROM qspecies q JOIN tree ON (q.qspeciesid = tree.qspeciesid) JOIN "location" l ON (l.locationid = tree.locationid) JOIN thumbnail ON (q.qspeciesid = thumbnail.qspeciesid) LIMIT 250;';
+    var selectTrees = 'SELECT tree.name, tree.treeid, q.qspecies, l.latitude, l.longitude, image.imageurl as url, image.imagewidth, image.imageheight, image.imagetype FROM qspecies q JOIN tree ON (q.qspeciesid = tree.qspeciesid) JOIN "location" l ON (l.locationid = tree.locationid) JOIN "image" ON (q.qspeciesid = image.qspeciesid) LIMIT 250;';
     client.query(selectTrees, function(error, results) {
     }, function(error, results) {
       done();
@@ -151,7 +152,7 @@ exports.searchTrees = function(req, res) {
   pg.connect(conString, function(err, client, done) {
     console.log('in search trees');
     // console.log(err);
-    var selectTrees = 'SELECT tree.name, tree.treeid, q.qspecies, l.latitude, l.longitude, thumbnail.url, thumbnail.width, thumbnail.height, thumbnail.contenttype FROM qspecies q JOIN tree ON (q.qspeciesid = tree.qspeciesid) JOIN "location" l ON (l.locationid = tree.locationid) JOIN thumbnail ON (q.qspeciesid = thumbnail.qspeciesid) WHERE ' +
+    var selectTrees = 'SELECT tree.name, tree.treeid, q.qspecies, l.latitude, l.longitude, image.imageurl, image.imagewidth, image.imageheight, image.imagetype FROM qspecies q JOIN tree ON (q.qspeciesid = tree.qspeciesid) JOIN "location" l ON (l.locationid = tree.locationid) JOIN "image" ON (q.qspeciesid = image.qspeciesid) WHERE ' +
       'tree.treeid = $1 OR tree.name LIKE $2 OR q.qspecies LIKE $2 OR q.qspeciesid = $1 LIMIT 250 OFFSET $3;';
 
     // var selectTrees = 'SELECT tree.name, q.qspecies, l.latitude, l.longitude, thumbnail.url, thumbnail.width, ' +
